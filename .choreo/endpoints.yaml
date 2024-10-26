@@ -8,4 +8,11 @@ endpoints:
   type: REST
   networkVisibility: Public
   context: /
-  schemaFilePath: oas/PatientAPI.yaml           
+  schemaFilePath: oas/PatientAPI.yaml   
+
+- name: Health Sync API
+  port: 9091
+  type: REST
+  networkVisibility: Public
+  context: /
+  schemaFilePath: oas/SyncAPI.yaml 
