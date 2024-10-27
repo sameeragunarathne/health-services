@@ -1,7 +1,34 @@
+import ballerina/http;
 import ballerinax/health.fhir.r4;
 import ballerinax/health.fhir.r4.uscore501;
+import ballerinax/health.fhir.r4.validator;
 
-public isolated function mapData(CustomPatient payload) returns uscore501:USCorePatientProfile => {
+# Mapper function to map health data to FHIR resources
+#
+# + dataType - health data type
+# + payload - payload to be mapped
+# + return - mapped FHIR resource or error
+public isolated function mapToFhir(string dataType, anydata payload) returns anydata|r4:FHIRError {
+    match dataType {
+        "patient_data" => {
+            Patient|error patientData = payload.cloneWithType();
+            if patientData is error {
+                return r4:createFHIRError("Error occurred while cloning the payload", r4:ERROR, r4:INVALID);
+            }
+            uscore501:USCorePatientProfile fhirPayload = mapPatient(patientData);
+            r4:FHIRValidationError? validate = validator:validate(fhirPayload, uscore501:USCorePatientProfile);
+            if validate is r4:FHIRValidationError {
+                return r4:createFHIRError(validate.message(), r4:ERROR, r4:INVALID, cause = validate.cause(), errorType = r4:VALIDATION_ERROR, httpStatusCode = http:STATUS_BAD_REQUEST);
+            }
+            return fhirPayload;
+        }
+        _ => {
+            return r4:createFHIRError("Invalid data type", r4:ERROR, r4:INVALID);
+        }
+    }
+}
+
+public isolated function mapPatient(Patient payload) returns uscore501:USCorePatientProfile => {
     name: [
         {
             given: [payload.firstName],
@@ -31,6 +58,5 @@ public isolated function mapData(CustomPatient payload) returns uscore501:USCore
             state: locatoionDetailItem.province,
             postalCode: locatoionDetailItem.zipCode,
             id: locatoionDetailItem.identifier
-
         }
 };
