@@ -54,17 +54,17 @@ service on new kafka:Listener(kafkaEndpoint, consumerConfigs) {
         from HealthDataEvent event in events
         where event?.payload !is ()
         do {
-            log:printInfo(string `Health data event received: ${event?.payload.toJsonString()}` );
+            log:printInfo(string `Health data event received: ${event?.payload.toJsonString()}`, event = event);
             string? dataType = event?.dataType;
             if dataType is string {
                 anydata|r4:FHIRError mappedData = mapToFhir(dataType, event?.payload);
                 if mappedData is r4:FHIRError {
                     log:printError("Error occurred while mapping the data: ", mappedData);
                 } else {
-                    log:printInfo(string `FHIR resource mapped: ${mappedData.toJsonString()}`);
+                    log:printInfo(string `FHIR resource mapped: ${mappedData.toJsonString()}`, mappedData = mappedData.toJson());
                     r4:FHIRError|fhir:FHIRResponse response = createResource(mappedData.toJson());
                     if response is fhir:FHIRResponse {
-                        log:printInfo(string `FHIR resource created: ${response.toJsonString()}`);
+                        log:printInfo(string `FHIR resource created: ${response.toJsonString()}`, createdResource = response.toJson());
                     }
                 }
             } else {
