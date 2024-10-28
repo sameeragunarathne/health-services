@@ -11,7 +11,10 @@ public isolated function mapData(CustomPatient payload) returns uscore501:USCore
     meta: {
         versionId: payload.'version,
         lastUpdated: payload.lastUpdatedOn,
-        'source: payload.originSource
+        'source: payload.originSource,
+        profile: [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+        ]
     },
     text: {
         div: payload.description.details ?: "",
