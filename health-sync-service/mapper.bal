@@ -44,9 +44,7 @@ public isolated function mapPatient(Patient payload) returns uscore501:USCorePat
         versionId: payload.'version,
         lastUpdated: payload.lastUpdatedOn,
         'source: payload.originSource,
-        profile: [
-            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
-        ]
+        profile: [uscore501:PROFILE_BASE_USCOREPATIENTPROFILE]
     },
     text: {
         div: payload.description.details ?: "",
