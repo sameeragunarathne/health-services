@@ -1,5 +1,5 @@
 [package]
-org = "ballerinax"
+org = "medisafe"
 name = "sync.api"
 version = "1.0.0"
 distribution = "2201.8.6"
