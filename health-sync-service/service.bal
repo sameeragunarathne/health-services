@@ -61,6 +61,7 @@ service on new kafka:Listener(kafkaEndpoint, consumerConfigs) {
                 if mappedData is r4:FHIRError {
                     log:printError("Error occurred while mapping the data: ", mappedData);
                 } else {
+                    log:printInfo(string `FHIR resource mapped: ${mappedData.toJsonString()}`);
                     r4:FHIRError|fhir:FHIRResponse response = createResource(mappedData.toJson());
                     if response is fhir:FHIRResponse {
                         log:printInfo(string `FHIR resource created: ${response.toJsonString()}`);

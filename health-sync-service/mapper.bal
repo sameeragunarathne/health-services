@@ -43,7 +43,8 @@ public isolated function mapPatient(Patient payload) returns uscore501:USCorePat
     meta: {
         versionId: payload.'version,
         lastUpdated: payload.lastUpdatedOn,
-        'source: payload.originSource
+        'source: payload.originSource,
+        profile: [uscore501:PROFILE_BASE_USCOREPATIENTPROFILE]
     },
     text: {
         div: payload.description.details ?: "",
