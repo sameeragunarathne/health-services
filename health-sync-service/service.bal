@@ -54,7 +54,7 @@ service on new kafka:Listener(kafkaEndpoint, consumerConfigs) {
         from HealthDataEvent event in events
         where event?.payload !is ()
         do {
-            log:printInfo("Health data event received: ", payload = event?.payload);
+            log:printInfo("Health data event received: ", payload = event?.payload.toJsonString());
             string? dataType = event?.dataType;
             if dataType is string {
                 anydata|r4:FHIRError mappedData = mapToFhir(dataType, event?.payload);
