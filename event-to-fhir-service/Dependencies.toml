@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.8.6"
+distribution-version = "2201.8.5"
 
 [[package]]
 org = "ballerina"
@@ -436,8 +436,8 @@ modules = [
 ]
 
 [[package]]
-org = "ballerinax"
-name = "sync.api"
+org = "wso2"
+name = "event_to_fhir"
 version = "1.0.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
@@ -452,6 +452,6 @@ dependencies = [
 	{org = "ballerinax", name = "kafka"}
 ]
 modules = [
-	{org = "ballerinax", packageName = "sync.api", moduleName = "sync.api"}
+	{org = "wso2", packageName = "event_to_fhir", moduleName = "event_to_fhir"}
 ]
 
