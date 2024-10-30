@@ -64,6 +64,7 @@ public isolated function mapPatient(Patient payload) returns uscore501:USCorePat
             state: locatoionDetailItem.province,
             postalCode: locatoionDetailItem.zipCode,
             id: locatoionDetailItem.identifier
-        }
+        },
+    id: payload.patientId
 };
 
