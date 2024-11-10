@@ -3,23 +3,23 @@ import ballerina/http;
 import ballerina/log;
 import ballerinax/health.fhir.r4;
 
-http:OAuth2ClientCredentialsGrantConfig ehrSystemAuthConfig = {
-    tokenUrl: "https://login.microsoftonline.com/da76d684-740f-4d94-8717-9d5fb21dd1f9/oauth2/token",
+http:OAuth2ClientCredentialsGrantConfig fhirServerAuthConfig = {
+    tokenUrl: tokenUrl,
     clientId: client_id,
     clientSecret: client_secret,
-    scopes: ["system/Patient.read, system/Patient.write"],
+    scopes: scopes,
     optionalParams: {
-        "resource": "https://ohfhirrepositorypoc-ohfhirrepositorypoc.fhir.azurehealthcareapis.com"
+        "resource": fhirServerUrl
     }
 };
 
-fhir:FHIRConnectorConfig ehrSystemConfig = {
-    baseURL: "https://ohfhirrepositorypoc-ohfhirrepositorypoc.fhir.azurehealthcareapis.com/",
+fhir:FHIRConnectorConfig fhirServerConfig = {
+    baseURL: fhirServerUrl,
     mimeType: fhir:FHIR_JSON,
-    authConfig : ehrSystemAuthConfig
+    authConfig : fhirServerAuthConfig
 };
 
-isolated fhir:FHIRConnector fhirConnectorObj = check new (ehrSystemConfig);
+isolated fhir:FHIRConnector fhirConnectorObj = check new (fhirServerConfig);
 
 public isolated function create(json payload) returns r4:FHIRError|fhir:FHIRResponse{
     lock {

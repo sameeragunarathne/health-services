@@ -23,6 +23,10 @@ import ballerinax/health.clients.fhir;
 import ballerinax/health.fhir.r4.parser;
 import ballerina/log;
 
+# FHIR server configurations
+configurable string fhirServerUrl = ?;
+configurable string tokenUrl = ?;
+configurable string[] scopes = ?;
 configurable string client_id = ?;
 configurable string client_secret = ?;
 
