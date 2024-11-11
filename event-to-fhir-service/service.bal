@@ -32,7 +32,8 @@ service / on new http:Listener(9090) {
         log:printInfo("Health data consumer service started");
     }
 
-    resource function post events(HealthDataEvent[] events) returns error? {
+    resource function post events(HealthDataEvent[] events) returns json|error? {
+        json[] createdResources = [];
         foreach var event in events {
             do {
                 log:printInfo(string `Health data event received: ${event?.payload.toJsonString()}`, event = event);
@@ -46,6 +47,8 @@ service / on new http:Listener(9090) {
                         r4:FHIRError|fhir:FHIRResponse response = createResource(mappedData.toJson());
                         if response is fhir:FHIRResponse {
                             log:printInfo(string `FHIR resource created: ${response.toJsonString()}`, createdResource = response.toJson());
+                            // Add the created resource to the response array
+                            createdResources.push(response.'resource.toJson());
                         }
                     }
                 } else {
@@ -53,6 +56,11 @@ service / on new http:Listener(9090) {
                 }
             }
         }
+        if createdResources.length() == 0 {
+            return error("Failed to create resources");
+        }
+        // Return the created resources
+        return { createdResources: createdResources };
     }
 }
 
