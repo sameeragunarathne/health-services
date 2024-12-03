@@ -1,7 +1,9 @@
 import ballerina/http;
+import ballerina/log;
 import ballerinax/health.fhir.r4;
 import ballerinax/health.fhir.r4.uscore501;
 import ballerinax/health.fhir.r4.validator;
+import ballerinax/health.hl7v2.utils.v2tofhirr4;
 
 # Mapper function to map health data to FHIR resources
 #
@@ -21,6 +23,30 @@ public isolated function mapToFhir(string dataType, anydata payload) returns any
                 return r4:createFHIRError(validate.message(), r4:ERROR, r4:INVALID, cause = validate.cause(), errorType = r4:VALIDATION_ERROR, httpStatusCode = http:STATUS_BAD_REQUEST);
             }
             return fhirPayload;
+        }
+        "hl7_data" => {
+            HL7Data|error hl7Data = payload.cloneWithType();
+            if hl7Data is error {
+                return r4:createFHIRError("Error occurred while cloning the payload", r4:ERROR, r4:INVALID);
+            }
+            json|error v2tofhirResult = v2tofhirr4:v2ToFhir(hl7Data.mllpStr);
+            if v2tofhirResult is json {
+                log:printInfo(string `FHIR resource mapped: ${v2tofhirResult.toJsonString()}`, mappedData = v2tofhirResult);
+                r4:Bundle|error fhirPayload = v2tofhirResult.cloneWithType();
+                if fhirPayload is r4:Bundle {
+                    r4:BundleEntry[] entries = <r4:BundleEntry[]>fhirPayload.entry;
+                    foreach var entry in entries {
+                        anydata fhirResource = entry?.'resource;
+                        if fhirResource is map<json> && fhirResource["resourceType"] == "Patient" {
+                            uscore501:USCorePatientProfile|error patient = fhirResource.cloneWithType();
+                            if patient is error {
+                                return r4:createFHIRError("Error occurred while cloning the payload", r4:ERROR, r4:INVALID);
+                            }
+                            return patient;
+                        }
+                    }
+                }
+            }
         }
         _ => {
             return r4:createFHIRError("Invalid data type", r4:ERROR, r4:INVALID);
@@ -67,47 +93,3 @@ public isolated function mapPatient(Patient payload) returns uscore501:USCorePat
     id: payload.patientId
 };
 
-// public isolated function mapGender(string input) returns r4:CodeableConceptExtension {
-//     string mappedCode;
-//     match input {
-//         "male" => {
-//             mappedCode = "male";
-//         }
-//         "female" => {
-//             mappedCode = "female";
-//         }
-//         "other" => {
-//             mappedCode = "other";
-//         }
-//         "unknown" => {
-//             mappedCode = "unknown";
-//         }
-//         "M" => {
-//             mappedCode = "male";
-//         }
-//         "F" => {
-//             mappedCode = "female";
-//         }
-//         "O" => {
-//             mappedCode = "other";
-//         }
-//         _ => {
-//             mappedCode = "unknown";
-//         }
-//     }
-
-//     //call terminology service
-//     http:Response|http:ClientError unionResult = terminologyClient->/CodeSystem/administrative\-gender/lookup(code = mappedCode);
-    
-//     r4:CodeableConceptExtension genderExtension = {
-//         url: "http://hl7.org/fhir/administrative-gender",
-//         valueCodeableConcept: {
-//             coding: [
-//                 {
-//                     system: "http://hl7.org/fhir/administrative-gender"
-//                 }
-//             ]
-//         }
-//     };
-
-// }

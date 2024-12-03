@@ -21,6 +21,10 @@ public type Patient record {
     LocatoionDetail[] locatoionDetail;
 };
 
+public type HL7Data record {
+    string mllpStr;
+};
+
 public type Identifier record {
     IdType id_type;
     string id_value;
