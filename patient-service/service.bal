@@ -22,6 +22,7 @@ import ballerinax/health.fhir.r4.uscore501;
 import ballerinax/health.clients.fhir;
 import ballerinax/health.fhir.r4.parser;
 import ballerina/log;
+import ballerinax/health.fhir.r4.international401;
 
 # FHIR server configurations
 configurable string fhirServerUrl = ?;
@@ -34,20 +35,20 @@ configurable string client_secret = ?;
 # Generic type to wrap all implemented profiles.
 # Add required profile types here.
 # public type Patient r4:Patient|<other_Patient_Profile>;
-public type Patient uscore501:USCorePatientProfile;
+public type Patient uscore501:USCorePatientProfile|international401:Patient;
 
 # initialize source system endpoint here
 
 # A service representing a network-accessible API
 # bound to port `9090`.
-service / on new fhirr4:Listener(9090, apiConfig) {
+service / on new fhirr4:Listener(9091, apiConfig) {
 
     // Read the current state of single resource based on its id.
     isolated resource function get fhir/r4/Patient/[string id] (r4:FHIRContext fhirContext) returns Patient|r4:OperationOutcome|r4:FHIRError {
         fhir:FHIRResponse response = check getById("Patient", id);
 
         do {
-            return <uscore501:USCorePatientProfile> check parser:parse(response.'resource, uscore501:USCorePatientProfile);
+            return <international401:Patient> check parser:parse(response.'resource, international401:Patient);
         } on fail error parseError {
             log:printError(string `Error occurred while parsing : ${parseError.message()}`, parseError);
             return r4:createFHIRError(parseError.message(), r4:ERROR, r4:INVALID, httpStatusCode = http:STATUS_INTERNAL_SERVER_ERROR);

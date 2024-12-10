@@ -1,24 +1,24 @@
 import ballerina/http;
 import ballerina/log;
 import ballerinax/health.fhir.r4;
-import ballerinax/health.fhir.r4.uscore501;
 import ballerinax/health.fhir.r4.validator;
 import ballerinax/health.hl7v2.utils.v2tofhirr4;
+import ballerinax/health.fhir.r4.international401;
 
 # Mapper function to map health data to FHIR resources
 #
-# + dataType - health data type
+# + eventType - health event type
 # + payload - payload to be mapped
 # + return - mapped FHIR resource or error
-public isolated function mapToFhir(string dataType, anydata payload) returns anydata|r4:FHIRError {
-    match dataType {
+public isolated function mapToFhir(string eventType, anydata payload) returns anydata|r4:FHIRError {
+    match eventType {
         "patient_data" => {
             Patient|error patientData = payload.cloneWithType();
             if patientData is error {
                 return r4:createFHIRError("Error occurred while cloning the payload", r4:ERROR, r4:INVALID);
             }
-            uscore501:USCorePatientProfile fhirPayload = mapPatient(patientData);
-            r4:FHIRValidationError? validate = validator:validate(fhirPayload, uscore501:USCorePatientProfile);
+            international401:Patient fhirPayload = mapPatient(patientData);
+            r4:FHIRValidationError? validate = validator:validate(fhirPayload, international401:Patient);
             if validate is r4:FHIRValidationError {
                 return r4:createFHIRError(validate.message(), r4:ERROR, r4:INVALID, cause = validate.cause(), errorType = r4:VALIDATION_ERROR, httpStatusCode = http:STATUS_BAD_REQUEST);
             }
@@ -36,13 +36,10 @@ public isolated function mapToFhir(string dataType, anydata payload) returns any
                 if fhirPayload is r4:Bundle {
                     r4:BundleEntry[] entries = <r4:BundleEntry[]>fhirPayload.entry;
                     foreach var entry in entries {
-                        anydata fhirResource = entry?.'resource;
-                        if fhirResource is map<json> && fhirResource["resourceType"] == "Patient" {
-                            uscore501:USCorePatientProfile|error patient = fhirResource.cloneWithType();
-                            if patient is error {
-                                return r4:createFHIRError("Error occurred while cloning the payload", r4:ERROR, r4:INVALID);
-                            }
-                            return patient;
+                        map<anydata> fhirResource = <map<anydata>>entry?.'resource;
+                        if fhirResource["resourceType"] == "Patient" {
+                            log:printInfo(string `FHIR resource: ${fhirResource.toJsonString()}`, mappedData = fhirResource);
+                            return fhirResource;
                         }
                     }
                 }
@@ -58,7 +55,7 @@ public isolated function mapToFhir(string dataType, anydata payload) returns any
 #
 # + payload - patient data in custom format
 # + return - US Core Patient Profile
-public isolated function mapPatient(Patient payload) returns uscore501:USCorePatientProfile => {
+public isolated function mapPatient(Patient payload) returns international401:Patient => {
     name: [
         {
             given: [payload.firstName],
@@ -68,15 +65,14 @@ public isolated function mapPatient(Patient payload) returns uscore501:USCorePat
     meta: {
         versionId: payload.'version,
         lastUpdated: payload.lastUpdatedOn,
-        'source: payload.originSource,
-        profile: [uscore501:PROFILE_BASE_USCOREPATIENTPROFILE]
+        'source: payload.originSource
     },
     text: {
         div: payload.description.details ?: "",
         status: <r4:StatusCode>payload.description.status
 
     },
-    gender: <uscore501:USCorePatientProfileGender>payload.gender
+    gender: <international401:PatientGender>payload.gender
 ,
     identifier: [
         {system: payload.identifiers[0].id_type.codes[0].system_source, value: payload.identifiers[0].id_value}

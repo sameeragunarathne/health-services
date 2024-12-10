@@ -21,14 +21,14 @@ fhir:FHIRConnectorConfig ehrSystemConfig = {
 
 isolated fhir:FHIRConnector fhirConnectorObj = check new (ehrSystemConfig);
 
-public isolated function createResource(json payload) returns r4:FHIRError|fhir:FHIRResponse {
+public isolated function getResourceById(string id) returns r4:FHIRError|fhir:FHIRResponse {
     lock {
-        fhir:FHIRResponse|fhir:FHIRError fhirResponse = fhirConnectorObj->create(payload.clone());
+        fhir:FHIRResponse|fhir:FHIRError fhirResponse = fhirConnectorObj->getById("Patient", id);
         if fhirResponse is fhir:FHIRError {
             log:printError(fhirResponse.toBalString());
             return r4:createFHIRError(fhirResponse.message(), r4:ERROR, r4:INVALID, httpStatusCode = http:STATUS_INTERNAL_SERVER_ERROR);
         }
-        log:printInfo(string `Data stored successfully: ${fhirResponse.toJsonString()}`);
+        log:printInfo(string `Data retrieved successfully: ${fhirResponse.toJsonString()}`);
         return fhirResponse.clone();
     }
 }
