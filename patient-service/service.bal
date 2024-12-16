@@ -45,8 +45,9 @@ service / on new fhirr4:Listener(9091, apiConfig) {
 
     // Read the current state of single resource based on its id.
     isolated resource function get fhir/r4/Patient/[string id] (r4:FHIRContext fhirContext) returns Patient|r4:OperationOutcome|r4:FHIRError {
+        log:printInfo("READ operation is execution started");
         fhir:FHIRResponse response = check getById("Patient", id);
-
+        log:printInfo("READ operation is execution completed");
         do {
             return <international401:Patient> check parser:parse(response.'resource, international401:Patient);
         } on fail error parseError {
@@ -62,8 +63,9 @@ service / on new fhirr4:Listener(9091, apiConfig) {
 
     // Search for resources based on a set of criteria.
     isolated resource function get fhir/r4/Patient(r4:FHIRContext fhirContext) returns r4:Bundle|r4:OperationOutcome|r4:FHIRError {
+        log:printInfo("SEARCH operation is execution started");
         fhir:FHIRResponse searchResult = check search("Patient", getQueryParamsMap(fhirContext.getRequestSearchParameters()));
-
+        log:printInfo("SEARCH operation is execution completed");
         do {
             r4:Bundle bundle = check searchResult.'resource.cloneWithType(r4:Bundle);
             return bundle;
