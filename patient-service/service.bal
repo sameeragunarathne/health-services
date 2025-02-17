@@ -44,7 +44,7 @@ public type Patient uscore501:USCorePatientProfile|international401:Patient;
 service / on new fhirr4:Listener(9091, apiConfig) {
 
     // Read the current state of single resource based on its id.
-    isolated resource function get fhir/r4/Patient/[string id] (r4:FHIRContext fhirContext) returns Patient|r4:OperationOutcome|r4:FHIRError {
+    isolated resource function get Patient/[string id] (r4:FHIRContext fhirContext) returns Patient|r4:OperationOutcome|r4:FHIRError {
         log:printInfo("READ operation is execution started");
         fhir:FHIRResponse response = check getById("Patient", id);
         log:printInfo("READ operation is execution completed");
@@ -57,12 +57,12 @@ service / on new fhirr4:Listener(9091, apiConfig) {
     }
 
     // Read the state of a specific version of a resource based on its id.
-    isolated resource function get fhir/r4/Patient/[string id]/_history/[string vid] (r4:FHIRContext fhirContext) returns Patient|r4:OperationOutcome|r4:FHIRError {
+    isolated resource function get Patient/[string id]/_history/[string vid] (r4:FHIRContext fhirContext) returns Patient|r4:OperationOutcome|r4:FHIRError {
         return r4:createFHIRError("Not implemented", r4:ERROR, r4:INFORMATIONAL, httpStatusCode = http:STATUS_NOT_IMPLEMENTED);
     }
 
     // Search for resources based on a set of criteria.
-    isolated resource function get fhir/r4/Patient(r4:FHIRContext fhirContext) returns r4:Bundle|r4:OperationOutcome|r4:FHIRError {
+    isolated resource function get Patient(r4:FHIRContext fhirContext) returns r4:Bundle|r4:OperationOutcome|r4:FHIRError {
         log:printInfo("SEARCH operation is execution started");
         fhir:FHIRResponse searchResult = check search("Patient", getQueryParamsMap(fhirContext.getRequestSearchParameters()));
         log:printInfo("SEARCH operation is execution completed");
@@ -77,7 +77,7 @@ service / on new fhirr4:Listener(9091, apiConfig) {
     }
 
     // Create a new resource.
-    isolated resource function post fhir/r4/Patient(r4:FHIRContext fhirContext, Patient patient) returns Patient|r4:OperationOutcome|r4:FHIRError {
+    isolated resource function post Patient(r4:FHIRContext fhirContext, Patient patient) returns Patient|r4:OperationOutcome|r4:FHIRError {
         fhir:FHIRResponse response = check create(patient.toJson());
         
         ResponseResource|error resourceResult = response.'resource.cloneWithType(ResponseResource);
@@ -90,7 +90,7 @@ service / on new fhirr4:Listener(9091, apiConfig) {
     }
 
     // Update the current state of a resource completely.
-    isolated resource function put fhir/r4/Patient/[string id] (r4:FHIRContext fhirContext, Patient patient) returns Patient|r4:OperationOutcome|r4:FHIRError {
+    isolated resource function put Patient/[string id] (r4:FHIRContext fhirContext, Patient patient) returns Patient|r4:OperationOutcome|r4:FHIRError {
        fhir:FHIRResponse response = check update(patient.toJson());
 
        do {
@@ -102,7 +102,7 @@ service / on new fhirr4:Listener(9091, apiConfig) {
     }
 
     // Update the current state of a resource partially.
-    isolated resource function patch fhir/r4/Patient/[string id] (r4:FHIRContext fhirContext, json patch) returns Patient|r4:OperationOutcome|r4:FHIRError {
+    isolated resource function patch Patient/[string id] (r4:FHIRContext fhirContext, json patch) returns Patient|r4:OperationOutcome|r4:FHIRError {
         fhir:FHIRResponse response = check patchResource("Patient", id, patch);
 
         do {
@@ -114,17 +114,17 @@ service / on new fhirr4:Listener(9091, apiConfig) {
     }
 
     // Delete a resource.
-    isolated resource function delete fhir/r4/Patient/[string id] (r4:FHIRContext fhirContext) returns r4:OperationOutcome?|r4:FHIRError? {
+    isolated resource function delete Patient/[string id] (r4:FHIRContext fhirContext) returns r4:OperationOutcome?|r4:FHIRError? {
         _ = check delete("Patient", id);
     }
 
     // Retrieve the update history for a particular resource.
-    isolated resource function get fhir/r4/Patient/[string id]/_history (r4:FHIRContext fhirContext) returns r4:Bundle|r4:OperationOutcome|r4:FHIRError {
+    isolated resource function get Patient/[string id]/_history (r4:FHIRContext fhirContext) returns r4:Bundle|r4:OperationOutcome|r4:FHIRError {
         return r4:createFHIRError("Not implemented", r4:ERROR, r4:INFORMATIONAL, httpStatusCode = http:STATUS_NOT_IMPLEMENTED);
     }
 
     // Retrieve the update history for all resources.
-    isolated resource function get fhir/r4/Patient/_history (r4:FHIRContext fhirContext) returns r4:Bundle|r4:OperationOutcome|r4:FHIRError {
+    isolated resource function get Patient/_history (r4:FHIRContext fhirContext) returns r4:Bundle|r4:OperationOutcome|r4:FHIRError {
         return r4:createFHIRError("Not implemented", r4:ERROR, r4:INFORMATIONAL, httpStatusCode = http:STATUS_NOT_IMPLEMENTED);
     }
 }
